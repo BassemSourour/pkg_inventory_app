@@ -1,0 +1,861 @@
+:root {
+    --reunion-burgundy: #7a1f43;
+    --reunion-burgundy-dark: #5f1633;
+    --reunion-tan: #b89d7b;
+    --reunion-tan-light: #efe5d8;
+    --reunion-cream: #f8f5ef;
+    --reunion-card: #fffdf9;
+    --reunion-text: #241816;
+    --reunion-muted: #6f625b;
+    --reunion-border: #dfd2c2;
+    --danger: #b42318;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding-bottom: 78px;
+    background: var(--reunion-cream);
+    color: var(--reunion-text);
+}
+
+.container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding: 18px 22px;
+    background: linear-gradient(
+        135deg,
+        #fffdf9,
+        #f1e6d8
+    );
+    border: 1px solid var(--reunion-border);
+    border-radius: 18px;
+    box-shadow: 0 3px 14px rgba(95, 22, 51, 0.10);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.brand-logo {
+    width: auto;
+    height: 78px;
+    object-fit: contain;
+}
+
+h1 {
+    margin: 0;
+    color: var(--reunion-burgundy);
+    font-size: 30px;
+    letter-spacing: 0.2px;
+}
+
+.subtitle {
+    margin: 6px 0 0;
+    color: var(--reunion-muted);
+    font-size: 15px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+}
+
+h2 {
+    margin-top: 0;
+    color: var(--reunion-burgundy);
+}
+
+h3 {
+    margin: 0 0 6px;
+    color: var(--reunion-burgundy);
+}
+
+label {
+    display: block;
+    margin: 16px 0 7px;
+    color: var(--reunion-burgundy-dark);
+    font-weight: 600;
+}
+
+.card,
+.status-card {
+    margin-bottom: 16px;
+    padding: 18px;
+    background: var(--reunion-card);
+    border: 1px solid var(--reunion-border);
+    border-radius: 16px;
+    box-shadow: 0 3px 12px rgba(36, 24, 22, 0.08);
+}
+
+.status-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    color: var(--reunion-muted);
+}
+
+.section-description {
+    color: var(--reunion-muted);
+}
+
+.download-btn {
+    display: inline-block;
+    padding: 14px 18px;
+    color: white;
+    background: var(--reunion-burgundy);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.download-btn:hover {
+    background: var(--reunion-burgundy-dark);
+}
+
+.network-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+}
+
+.network-card h3 {
+    margin: 0 0 6px;
+}
+
+.network-url {
+    margin: 0;
+    color: var(--reunion-burgundy);
+    font-family: Consolas, monospace;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.network-help {
+    margin: 8px 0 0;
+    color: var(--reunion-muted);
+}
+
+.qr-code {
+    width: 120px;
+    height: 120px;
+    padding: 8px;
+    object-fit: contain;
+    background: white;
+    border: 1px solid var(--reunion-border);
+    border-radius: 12px;
+}
+
+.upload-status-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.upload-status-card h3 {
+    margin: 0 0 6px;
+}
+
+.upload-status-card p {
+    margin: 0;
+    color: var(--reunion-muted);
+}
+
+.upload-form,
+.replace-upload-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.tab,
+button {
+    padding: 14px 18px;
+    color: white;
+    background: var(--reunion-burgundy);
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tab {
+    color: var(--reunion-burgundy);
+    background: var(--reunion-tan-light);
+}
+
+.tab.active {
+    color: white;
+    background: var(--reunion-burgundy);
+}
+
+button:hover,
+.tab:hover {
+    opacity: 0.92;
+}
+
+button.secondary {
+    color: var(--reunion-burgundy);
+    background: var(--reunion-tan-light);
+    border: 1px solid var(--reunion-border);
+}
+
+button.danger {
+    color: white;
+    background: var(--danger);
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.large-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 15px;
+    color: var(--reunion-text);
+    background: #fffefa;
+    border: 1px solid var(--reunion-border);
+    border-radius: 12px;
+    font-size: 22px;
+}
+
+.large-input:focus {
+    outline: none;
+    border-color: var(--reunion-burgundy);
+    box-shadow: 0 0 0 3px rgba(122, 31, 67, 0.12);
+}
+
+/*
+ * Swallows the stray tap that follows a saved count.
+ * Hiding the selected item shifts the layout, so the
+ * finger would otherwise land on whichever button
+ * moved underneath it.
+ */
+.tap-shield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9000;
+    background: transparent;
+    touch-action: none;
+}
+
+.search-status {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    background: #eef6ee;
+    border: 1px solid #bcd8bc;
+    border-left: 5px solid #2f7d32;
+    border-radius: 10px;
+    color: #1f5c22;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.last-counted {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding: 14px 16px;
+    background: #fffefa;
+    border: 1px solid var(--reunion-border);
+    border-left: 5px solid var(--reunion-burgundy);
+    border-radius: 12px;
+}
+
+.last-counted h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+}
+
+.last-counted p {
+    margin: 0;
+    color: var(--reunion-muted);
+    font-size: 16px;
+}
+
+.last-counted button {
+    flex-shrink: 0;
+    min-height: 52px;
+}
+
+.results {
+    margin-top: 14px;
+}
+
+.result-item,
+.entry-item {
+    margin-bottom: 10px;
+    padding: 14px;
+    background: #fffefa;
+    border: 1px solid var(--reunion-border);
+    border-radius: 12px;
+}
+
+.result-item {
+    cursor: pointer;
+}
+
+.result-item:hover,
+.result-item.highlighted {
+    background: #f4eadf;
+    border-color: var(--reunion-burgundy);
+}
+
+.result-item.highlighted {
+    box-shadow: 0 0 0 2px rgba(122, 31, 67, 0.12);
+}
+
+.result-main {
+    color: var(--reunion-burgundy);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.result-sub,
+.entry-sub {
+    margin-top: 4px;
+    color: var(--reunion-muted);
+}
+
+.not-found {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 16px;
+    background: linear-gradient(
+        135deg,
+        #f3e8da,
+        #fffdf9
+    );
+    border: 1px solid var(--reunion-border);
+    border-radius: 14px;
+}
+
+.not-found p {
+    margin: 0;
+    color: var(--reunion-muted);
+}
+
+.hidden {
+    display: none;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+
+
+.entry-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.entry-actions input {
+    width: 120px;
+    padding: 10px;
+    border: 1px solid var(--reunion-border);
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+#selectedItemNumber {
+    color: var(--reunion-burgundy);
+    font-size: 28px;
+}
+
+#selectedProductName,
+#saveStatus,
+#exceptionStatus {
+    color: var(--reunion-muted);
+}
+
+/*
+ * Status text and fields that failed validation.
+ * Both class names were already used by the scripts.
+ */
+.error-message,
+#exceptionStatus.error-message,
+#saveStatus.error-message {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.input-error {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.12);
+}
+
+.app-footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 18px 20px;
+    color: var(--reunion-burgundy);
+    background: #fffdf9;
+    border-top: 2px solid var(--reunion-tan);
+    box-shadow: 0 -3px 12px rgba(36, 24, 22, 0.08);
+    font-style: italic;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .container {
+        padding: 12px;
+    }
+
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .brand {
+        align-items: flex-start;
+    }
+
+    .brand-logo {
+        height: 62px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .download-btn {
+        box-sizing: border-box;
+        width: 100%;
+        text-align: center;
+    }
+
+    .network-card,
+    .upload-status-card,
+    .not-found,
+    .last-counted {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .last-counted button {
+        width: 100%;
+    }
+
+    .replace-upload-form,
+    .upload-form {
+        width: 100%;
+    }
+
+    .replace-upload-form button,
+    .upload-form button {
+        width: 100%;
+    }
+
+    .qr-code {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+#selectedExistingCount {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--reunion-burgundy);
+}
+
+
+
+/* Touchscreen and handheld device improvements */
+
+button,
+.tab,
+.download-btn {
+    min-height: 48px;
+    touch-action: manipulation;
+}
+
+input,
+button,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.large-input {
+    min-height: 54px;
+}
+
+.result-item {
+    min-height: 64px;
+    padding: 16px;
+}
+
+.entry-actions button {
+    min-height: 48px;
+}
+
+.entry-actions input {
+    min-height: 48px;
+}
+
+@media (max-width: 700px) {
+    body {
+        padding-bottom: 64px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+        padding: 10px;
+    }
+
+    .app-header {
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 12px;
+    }
+
+    .brand {
+        width: 100%;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .brand-logo {
+        height: 48px;
+        max-width: 120px;
+    }
+
+    h1 {
+        font-size: 20px;
+        line-height: 1.2;
+    }
+
+    .subtitle {
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+
+    .card,
+    .status-card {
+        padding: 14px;
+        margin-bottom: 10px;
+        border-radius: 12px;
+    }
+
+    .network-card {
+        display: none;
+    }
+
+    .download-btn {
+        width: 100%;
+        padding: 13px;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .tabs {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .tab {
+        width: 100%;
+        min-height: 52px;
+        font-size: 17px;
+    }
+
+    .large-input {
+        min-height: 58px;
+        padding: 14px;
+        font-size: 20px;
+    }
+
+    .result-item {
+        min-height: 72px;
+        padding: 14px;
+    }
+
+    .result-main {
+        font-size: 19px;
+    }
+
+    .result-sub {
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    #selectedItemNumber {
+        font-size: 24px;
+    }
+
+    #selectedExistingCount {
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    .button-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .button-row button {
+        width: 100%;
+        min-height: 54px;
+        font-size: 17px;
+    }
+
+    .entry-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .entry-actions input,
+    .entry-actions button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .not-found,
+    .last-counted {
+        padding: 14px;
+    }
+
+    .not-found button,
+    .last-counted button {
+        width: 100%;
+        min-height: 52px;
+    }
+
+    .upload-status-card {
+        gap: 12px;
+    }
+
+    .replace-upload-form,
+    .replace-upload-form button {
+        width: 100%;
+    }
+
+    .app-footer {
+        padding: 12px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 420px) {
+    .container {
+        padding: 6px;
+    }
+
+    .brand-logo {
+        height: 40px;
+        max-width: 100px;
+    }
+
+    h1 {
+        font-size: 18px;
+    }
+
+    .subtitle {
+        display: none;
+    }
+
+    .card,
+    .status-card {
+        padding: 11px;
+        border-radius: 9px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    .large-input {
+        font-size: 18px;
+    }
+
+    .result-main {
+        font-size: 18px;
+    }
+
+    .result-sub {
+        font-size: 14px;
+    }
+}
+
+.search-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.search-header-row h2 {
+    margin: 0;
+}
+
+#zeroCountToggleButton {
+    flex-shrink: 0;
+}
+
+#zeroCountStatus {
+    margin: 0 0 12px;
+    color: var(--reunion-muted);
+    font-weight: 600;
+}
+
+#zeroCountResults {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.zero-count-row {
+    display: grid;
+    grid-template-columns:
+        minmax(105px, 150px)
+        minmax(0, 1fr)
+        auto;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 14px;
+    color: var(--reunion-text);
+    background: #fffefa;
+    border: 1px solid var(--reunion-border);
+    border-radius: 9px;
+    text-align: left;
+}
+
+.zero-count-row:hover,
+.zero-count-row:focus {
+    background: #f4eadf;
+    border-color: var(--reunion-burgundy);
+    opacity: 1;
+    outline: none;
+}
+
+.zero-count-number {
+    color: var(--reunion-burgundy);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.zero-count-description {
+    overflow: hidden;
+    color: var(--reunion-text);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.zero-count-total {
+    color: var(--reunion-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .search-header-row {
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-header-row h2 {
+        font-size: 20px;
+    }
+
+    #zeroCountToggleButton {
+        width: auto;
+        min-height: 46px;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .zero-count-row {
+        grid-template-columns:
+            minmax(90px, 115px)
+            minmax(0, 1fr)
+            auto;
+        gap: 8px;
+        min-height: 46px;
+        padding: 9px 10px;
+        font-size: 14px;
+    }
+
+    .zero-count-total {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 420px) {
+    .search-header-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    #zeroCountToggleButton {
+        width: 100%;
+    }
+
+    .zero-count-row {
+        grid-template-columns:
+            minmax(82px, 100px)
+            minmax(0, 1fr);
+    }
+
+    .zero-count-total {
+        display: none;
+    }
+}

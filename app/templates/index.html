@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Packaging Inventory Logger</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/styles.css') }}"
+    >
+</head>
+
+<body>
+<main class="container">
+    <header class="app-header">
+        <div class="brand">
+            <img
+                src="{{ url_for('static', filename='images/reunion_logo.png') }}"
+                alt="Reunion Coffee Roasters"
+                class="brand-logo"
+            >
+
+            <div>
+                <h1>Packaging Inventory Logger</h1>
+
+                <p class="subtitle">
+                    Reunion Coffee Roasters
+                </p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            {% if workbook_loaded %}
+            <div class="download-area">
+                <button
+                    type="button"
+                    class="download-btn"
+                    onclick="InventoryApp.showDownloadPassword()"
+                >
+                    Download Current File
+                </button>
+
+                <div
+                    id="downloadPasswordArea"
+                    class="hidden"
+                >
+                    <label for="downloadPassword">
+                        Admin password
+                    </label>
+
+                    <input
+                        id="downloadPassword"
+                        class="large-input"
+                        type="password"
+                        autocomplete="current-password"
+                        placeholder="Enter admin password"
+                    >
+
+                    <p
+                        id="downloadStatus"
+                        role="alert"
+                        aria-live="polite"
+                    ></p>
+
+                    <div class="button-row">
+                        <button
+                            id="downloadContinueButton"
+                            type="button"
+                            onclick="InventoryApp.validateDownloadPassword()"
+                        >
+                            Continue
+                        </button>
+
+                        <button
+                            type="button"
+                            class="secondary"
+                            onclick="InventoryApp.hideDownloadPassword()"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.remote_addr in ["127.0.0.1", "::1"] %}
+            <button
+                id="exitApplicationButton"
+                type="button"
+                class="secondary"
+                onclick="InventoryApp.exitApplication()"
+            >
+                Exit Application
+            </button>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="status-card network-card">
+        <div>
+            <h3>Open on another device</h3>
+
+            <p class="network-url">
+                {{ network_url }}
+            </p>
+
+            <p class="network-help">
+                Connect the device to the same network,
+                then scan the QR code.
+            </p>
+        </div>
+
+        <img
+            src="{{ qr_code }}"
+            alt="QR code for Packaging Inventory Logger"
+            class="qr-code"
+        >
+    </section>
+
+    {% if not workbook_loaded %}
+
+    <section class="card">
+        <h2>Upload Excel File</h2>
+
+        <p class="section-description">
+            Upload the inventory workbook to begin
+            a new counting session.
+        </p>
+
+        <form
+            id="initialWorkbookForm"
+            action="/upload"
+            method="post"
+            enctype="multipart/form-data"
+            class="upload-form"
+        >
+            <input
+                id="uploadFileInput"
+                class="hidden-file-input"
+                type="file"
+                name="file"
+                accept=".xlsx"
+                onchange="InventoryApp.submitInitialWorkbook()"
+            >
+
+            <button
+                type="button"
+                onclick="InventoryApp.showInitialPassword()"
+            >
+                Upload Excel File
+            </button>
+
+            <div
+                id="initialPasswordArea"
+                class="hidden"
+            >
+                <label for="initialUploadPassword">
+                    Admin password
+                </label>
+
+                <input
+                    id="initialUploadPassword"
+                    class="large-input"
+                    type="password"
+                    name="upload_password"
+                    autocomplete="current-password"
+                    placeholder="Enter admin password"
+                >
+
+                <div class="button-row">
+                    <button
+                        id="initialPasswordContinueButton"
+                        type="button"
+                        onclick="InventoryApp.validateInitialPassword()"
+                    >
+                        Continue
+                    </button>
+
+                    <button
+                        type="button"
+                        class="secondary"
+                        onclick="InventoryApp.hideInitialPassword()"
+                    >
+                        Cancel
+                    </button>
+                </div>
+
+                <p
+                    id="initialUploadStatus"
+                    role="alert"
+                    aria-live="polite"
+                ></p>
+            </div>
+        </form>
+    </section>
+
+    {% else %}
+
+    <section class="status-card upload-status-card">
+        <div>
+            <h3>Excel file loaded</h3>
+
+            <p>
+                Replace the current workbook to begin
+                a new counting session.
+            </p>
+        </div>
+
+        <form
+            id="replaceWorkbookForm"
+            action="/upload"
+            method="post"
+            enctype="multipart/form-data"
+            class="replace-upload-form"
+        >
+            <input
+                id="replaceFileInput"
+                class="hidden-file-input"
+                type="file"
+                name="file"
+                accept=".xlsx"
+                onchange="InventoryApp.submitReplacementWorkbook()"
+            >
+
+            <button
+                type="button"
+                onclick="InventoryApp.showReplacementPassword()"
+            >
+                Replace Excel File
+            </button>
+
+            <div
+                id="replacePasswordArea"
+                class="hidden"
+            >
+                <label for="replaceUploadPassword">
+                    Admin password
+                </label>
+
+                <input
+                    id="replaceUploadPassword"
+                    class="large-input"
+                    type="password"
+                    name="upload_password"
+                    autocomplete="current-password"
+                    placeholder="Enter admin password"
+                >
+
+                <p
+                    id="replaceUploadStatus"
+                    role="alert"
+                    aria-live="polite"
+                ></p>
+
+                <div class="button-row">
+                    <button
+                        id="replacePasswordContinueButton"
+                        type="button"
+                        onclick="InventoryApp.validateReplacementPassword()"
+                    >
+                        Continue
+                    </button>
+
+                    <button
+                        type="button"
+                        class="secondary"
+                        onclick="InventoryApp.hideReplacementPassword()"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section
+        id="manual"
+        class="card tab-content active"
+    >
+        <div class="search-header-row">
+            <h2 id="searchSectionTitle">
+                Search
+            </h2>
+
+            <button
+                id="zeroCountToggleButton"
+                type="button"
+                class="secondary"
+                onclick="InventoryApp.showZeroCountItems()"
+            >
+                View Zero Counts
+            </button>
+        </div>
+
+        <div id="normalSearchArea">
+            <input
+                id="searchInput"
+                class="large-input"
+                placeholder="Start typing an item number, such as PKG0628"
+                autocomplete="off"
+            >
+
+            <p
+                id="searchStatus"
+                class="search-status hidden"
+            ></p>
+
+            <div
+                id="lastCountedArea"
+                class="last-counted hidden"
+            >
+                <div>
+                    <h3>Still holding the same material?</h3>
+
+                    <p id="lastCountedLabel"></p>
+                </div>
+
+                <button
+                    id="lastCountedButton"
+                    type="button"
+                    class="secondary"
+                    onclick="InventoryApp.reopenLastCountedItem()"
+                >
+                    Back to Item
+                </button>
+            </div>
+
+            <div
+                id="results"
+                class="results"
+            ></div>
+
+            <div
+                id="notFoundArea"
+                class="not-found hidden"
+            >
+                <div>
+                    <h3>Item not found</h3>
+
+                    <p>
+                        Add it manually if it is not included
+                        in the inventory list.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="secondary"
+                    onclick="InventoryApp.showManualItemForm()"
+                >
+                    Add Item Not Found
+                </button>
+            </div>
+        </div>
+
+        <div
+            id="zeroCountArea"
+            class="hidden"
+        >
+            <p id="zeroCountStatus"></p>
+
+            <div id="zeroCountResults"></div>
+        </div>
+    </section>
+
+    <section
+        id="manualExceptionCard"
+        class="card hidden"
+    >
+        <h2>Add Item Not Found</h2>
+
+        <label for="exceptionItemNumber">
+            Item number
+        </label>
+
+        <input
+            id="exceptionItemNumber"
+            class="large-input"
+            placeholder="Item number"
+            autocomplete="off"
+        >
+
+        <label for="exceptionProductName">
+            Description or note
+        </label>
+
+        <input
+            id="exceptionProductName"
+            class="large-input"
+            placeholder="Description or note"
+            autocomplete="off"
+        >
+
+        <label for="exceptionCount">
+            Counted quantity
+        </label>
+
+        <input
+            id="exceptionCount"
+            class="large-input"
+            type="number"
+            min="0.000001"
+            step="any"
+            inputmode="decimal"
+            placeholder="Count"
+        >
+
+        <div class="button-row">
+            <button
+                id="saveManualItemButton"
+                type="button"
+                onclick="InventoryApp.saveManualItem()"
+            >
+                Save Item
+            </button>
+
+            <button
+                type="button"
+                class="secondary"
+                onclick="InventoryApp.hideManualItemForm()"
+            >
+                Cancel
+            </button>
+        </div>
+
+        <p
+            id="exceptionStatus"
+            role="alert"
+            aria-live="polite"
+        ></p>
+    </section>
+
+    <section
+        id="selectedCard"
+        class="card hidden"
+    >
+        <h2>Selected Item</h2>
+
+        <p>
+            <strong id="selectedItemNumber"></strong>
+        </p>
+
+        <p id="selectedProductName"></p>
+        <p id="selectedInventory"></p>
+        <p id="selectedExistingCount"></p>
+        <p id="selectedEntryCount"></p>
+
+        <label for="countInput">
+            Counted quantity
+        </label>
+
+        <input
+            id="countInput"
+            class="large-input"
+            type="number"
+            min="0.000001"
+            step="any"
+            inputmode="decimal"
+            placeholder="Enter number only"
+        >
+
+        <div class="button-row">
+            <button
+                id="saveCountButton"
+                type="button"
+            >
+                Add Count Entry
+            </button>
+
+            <button
+                class="secondary"
+                onclick="InventoryApp.clearSelection()"
+            >
+                Cancel
+            </button>
+        </div>
+
+        <p id="saveStatus"></p>
+
+        <button
+            class="secondary"
+            onclick="InventoryApp.toggleSelectedItemEntries()"
+        >
+            Edit Entries
+        </button>
+
+        <div
+            id="selectedItemEntriesWrapper"
+            class="hidden"
+        >
+            <h3>Entries for this item</h3>
+
+            <div id="selectedItemEntries"></div>
+        </div>
+    </section>
+
+    {% endif %}
+</main>
+
+<footer class="app-footer">
+    <span>
+        Sustainable coffee, from seed to cup.
+    </span>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script src="{{ url_for('static', filename='js/counts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/manual-items.js') }}"></script>
+<script src="{{ url_for('static', filename='js/network.js') }}"></script>
+</body>
+</html>

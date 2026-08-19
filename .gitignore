@@ -1,0 +1,26 @@
+# Virtual environments
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# PyInstaller output
+build/
+dist/
+
+# Runtime data: live workbook and count database
+data/
+uploads/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+
+# Claude Code local settings
+.claude/settings.local.json
