@@ -1,0 +1,477 @@
+==============================================================================
+ PACKAGING INVENTORY LOGGER - TECHNICAL HANDOVER
+ Reunion Coffee Roasters
+ App version 1.0.0        Document written 2026-08-20
+ Original author: Bassem Sourour (bsourour@reunioncoffeeroasters.com)
+==============================================================================
+
+WHO THIS IS FOR
+
+ Whoever has to fix, change, or rebuild this app when the original
+ author is not available. It assumes you can program, but it assumes
+ you have never seen this project before.
+
+ Read "1 - HOW TO USE THIS APP.txt" first. It tells you what the app
+ is supposed to do from the operator's point of view, which is the
+ spec. This document tells you how it does it and where the traps are.
+
+
+------------------------------------------------------------------------------
+ 1. WHERE THE SOURCE CODE IS
+------------------------------------------------------------------------------
+
+ Git repository:
+   https://github.com/BassemSourour/pkg_inventory_app
+
+ If that repository is not reachable (private account, account gone),
+ look for a copy of the project folder named "pkg_inventory_app" on the
+ author's work machine or on the shared drive. The whole app is about
+ 2,000 lines of Python/JS - it is small enough to read end to end in an
+ afternoon, and doing that is worth more than any document.
+
+ The full developer README lives in the repository root as README.md
+ and goes deeper than this file on some points.
+
+ If nothing else survives: the installed app's folder contains a
+ PyInstaller build, not source. You cannot recover readable source from
+ it in practice. The Git repo, or a copy of the project folder, is the
+ thing that matters. BACK IT UP SOMEWHERE THE COMPANY CONTROLS.
+
+
+------------------------------------------------------------------------------
+ 2. WHAT IT IS, TECHNICALLY
+------------------------------------------------------------------------------
+
+ It is a small Flask web app that is packaged to look and behave like a
+ normal Windows desktop program.
+
+   Language      Python 3.14 (developed on 3.14.6)
+   Web framework Flask 3.0.3
+   Web server    Waitress (production WSGI server, not Flask's dev
+                 server), bound to 0.0.0.0 so the LAN can reach it
+   Window        pywebview 6.2.1, which wraps the Windows WebView2
+                 control (WebView2 ships with Windows 10/11)
+   Database      SQLite (stdlib sqlite3), WAL mode
+   Excel         openpyxl 3.1.5
+   QR codes      qrcode[pil]
+   Frontend      Plain HTML/CSS/JavaScript. No framework, no build
+                 step, no npm. Deliberate: it must be editable by
+                 anyone with a text editor.
+   Packaging     PyInstaller (one-folder build) -> Inno Setup installer
+
+ The shape is: one process, one thread pool. run.py starts Waitress on
+ a background daemon thread, then opens a pywebview window pointed at
+ http://127.0.0.1:<port>. The "desktop app" and the "web app the
+ tablets use" are the exact same Flask app on the same port. There is
+ no second codebase for mobile.
+
+ Everything is local. There are no external services, no cloud, no API
+ keys, no accounts, no telemetry, and no internet dependency.
+
+
+------------------------------------------------------------------------------
+ 3. PROJECT LAYOUT
+------------------------------------------------------------------------------
+
+ run.py                     Entry point. Port resolution, single
+                            instance mutex, server start, window.
+ app/
+   __init__.py              Flask app factory, /shutdown endpoint
+   config.py                Paths, version, admin password, header
+                            aliases, runtime port
+   database.py              SQLite schema and all queries
+   excel_service.py         Workbook import, validation, export
+   network_service.py       LAN IP detection + QR code generation
+   validators.py            Count and item-number validation
+   routes/
+     main_routes.py         Home page, /api/ping
+     item_routes.py         Search, lookup, zero-counts, manual items
+     count_routes.py        Save, list, edit, delete count entries
+     file_routes.py         Upload, download, password checks
+   templates/index.html     The entire UI - one page
+   static/css/styles.css
+   static/js/main.js        Shared state + screen switching
+   static/js/search.js      Search box and results
+   static/js/counts.js      Count entry, editing, entries list
+   static/js/manual-items.js
+   static/js/network.js
+   static/images/reunion_logo.png
+ assets/icon.ico            Generated from the logo by make_icon.py
+ installer/
+   PackagingInventoryLogger.iss    Inno Setup script
+ tools/
+   build.ps1                Icon + exe + installer in one command
+   make_icon.py             Regenerates assets/icon.ico
+   make_sample_workbook.py  Regenerates the sample workbook shipped
+                            with the installer
+ requirements.txt           Runtime deps only (not build tools)
+ PackagingInventoryLogger.spec   PyInstaller spec
+ data/                      Runtime data when run from source (ignored
+                            by git)
+
+
+------------------------------------------------------------------------------
+ 4. HOW THE DATA FLOWS
+------------------------------------------------------------------------------
+
+ UPLOAD
+   The admin posts an .xlsx to /upload. It is written to
+   pending_inventory.xlsx and validated BEFORE anything is replaced -
+   the app must find a header row (searching the first 20 rows) with at
+   least an item-number column and a counted column. Only if that
+   succeeds does it become source_inventory.xlsx.
+   A bad upload leaves the current session completely intact.
+
+ IMPORT
+   The workbook is read into the SQLite `items` table: one row per
+   item, storing the item number, product name, physical inventory, and
+   crucially THE ORIGINAL EXCEL ROW NUMBER it came from.
+   Uploading a workbook RESETS the database. All previous counts are
+   destroyed. The UI confirms first.
+
+ COUNTING
+   Each recorded count is one row in `count_entries` (timestamp, item
+   number, count, source). An item's total is ALWAYS computed as
+   SUM(count) over its entries. No running total is stored anywhere.
+   This is the single most important design decision in the app - see
+   section 5.
+
+ EXPORT
+   /download re-opens source_inventory.xlsx (the original, untouched)
+   and writes each item's summed total into the counted column on the
+   item's ORIGINAL ROW, then streams it back as
+   updated_inventory.xlsx. Manually added items are appended below the
+   last row with an "Added Manually" flag column, created if absent.
+   The source workbook is never edited in place. It is both the import
+   source and the export template.
+
+ THE TWO TABLES (in inventory_counts.sqlite3, WAL mode):
+   items           item_number (primary key), product_name,
+                   physical_inventory, row_number, added_manually
+   count_entries   id, timestamp, item_number (FK -> items, cascade
+                   delete), count (CHECK >= 0), source
+
+
+------------------------------------------------------------------------------
+ 5. DESIGN DECISIONS AND WHY THEY ARE THAT WAY
+------------------------------------------------------------------------------
+
+ Read these before "simplifying" anything. Each one exists because of
+ a real failure mode on a real inventory count.
+
+ * COUNTS ARE APPEND-ONLY ENTRIES, NOT A SINGLE NUMBER PER ITEM.
+   A person counting a pallet finds stock in three places. With a
+   single editable total they have to remember the old number, add to
+   it, and retype it - and two people counting at once overwrite each
+   other. With entries, both problems disappear, and every count is
+   individually reviewable and deletable. Do not "optimise" this into
+   a stored total.
+
+ * COLUMNS ARE FOUND BY HEADER NAME, NEVER BY COLUMN LETTER.
+   The spreadsheet comes from other people and its columns move.
+   HEADER_ALIASES in app/config.py maps logical names to the header
+   text variants seen in the wild. Adding a new accepted header name
+   is a one-line change there and needs no other code touched.
+
+ * THE `diff` COLUMN IS NEVER WRITTEN TO.
+   It usually holds formulas comparing physical inventory to counted.
+   Writing a value there would destroy them. The app reads it at most.
+
+ * DATA LIVES OUTSIDE THE PROGRAM FOLDER.
+   %LOCALAPPDATA%\PackagingInventoryLogger\data, not next to the exe.
+   Two reasons: an installed program cannot count on being able to
+   write beside its own executable, and an uninstall or upgrade would
+   otherwise wipe a count in progress. get_data_directory() in
+   config.py switches between that and the project's own data/ folder
+   depending on whether it is a frozen build - so development counts
+   never mix with production ones.
+
+ * THE PORT IS RESOLVED AT STARTUP, NOT FIXED.
+   Something else may hold 5000. resolve_port() in run.py scans 5000
+   through 5019. Everything that builds a URL must read the port via
+   config.get_port() so the QR code always points at the port actually
+   in use. Note that port_is_free() deliberately does NOT set
+   SO_REUSEADDR - on Windows that flag would let the bind succeed on a
+   port another process is actively listening on, making every port
+   look free.
+
+ * SINGLE INSTANCE.
+   Two servers would mean two databases' worth of confusion. run.py
+   first asks /api/ping whether the app is already on the port (rather
+   than only testing the bind, so an existing copy is recognised
+   regardless of socket quirks), and holds a named Windows mutex,
+   PackagingInventoryLoggerMutex. The installer's AppMutex is that same
+   name, which is what lets setup offer to close a running copy
+   instead of failing on a locked file. IF YOU RENAME THE MUTEX,
+   RENAME IT IN BOTH PLACES.
+
+ * PER-USER INSTALL (PrivilegesRequired=lowest in the .iss).
+   Floor staff do not have the admin password for the machine.
+   The cost is that counts do not carry across Windows logins.
+
+ * THE .iss AppId GUID IDENTIFIES THE APP TO WINDOWS.
+   Changing it makes the next install a SECOND COPY rather than an
+   upgrade. Leave it alone. It is
+   {8C3F1B42-5D6E-4A79-9E21-7B4C0D8F1A63}.
+
+ * THE ADMIN PASSWORD IS A GUARD RAIL, NOT SECURITY.
+   UPLOAD_PASSWORD in app/config.py, therefore compiled into the
+   distributed exe and trivially recoverable. Its job is to stop
+   someone tapping "Replace Excel File" and wiping a count. Anyone on
+   the network can record counts with no password at all, on purpose.
+   If real access control is ever needed, that is a different app -
+   do not pretend this password provides it.
+
+ * STARTUP ERRORS GO TO A FILE.
+   A windowed PyInstaller build has no console, so a crash before the
+   window opens would be silent. log_message() in run.py appends to
+   data\startup.log, and fatal errors also raise a MessageBox pointing
+   at it. That log is the first thing to ask for when someone says
+   "it will not open".
+
+ * STRAY-TAP SHIELD IN THE FRONTEND.
+   Taps are briefly ignored right after a screen change, because a
+   double-tap on a tablet was firing the next screen's button. If you
+   ever see "clicks are being ignored", that is where it lives
+   (static/js/main.js).
+
+ * NO FRONTEND BUILD STEP.
+   Plain JS on purpose, so a small fix does not require a toolchain.
+
+
+------------------------------------------------------------------------------
+ 6. WHERE TO CHANGE THE COMMON THINGS
+------------------------------------------------------------------------------
+
+ Change the admin password
+   app/config.py -> UPLOAD_PASSWORD. Rebuild and reinstall.
+
+ Bump the version
+   app/config.py -> APP_VERSION. THIS IS THE ONLY PLACE. tools/build.ps1
+   reads it and passes it to the installer compiler and the exe name.
+
+ Accept another spreadsheet header name
+   app/config.py -> HEADER_ALIASES. Add the lowercase variant to the
+   right list. Nothing else to change.
+
+ Change the allowed item-number formats
+   app/validators.py -> VALID_ITEM_NUMBER_PATTERN. Currently:
+     ^(?:PKG\d{4}(?:-\d)?|FLA\d{4}(?:-\d)?|ALL\d{4})$   (case-insensitive)
+   i.e. PKG0628, PKG1422-2, FLA9200, FLA9289-2, ALL8109. Also update
+   the example text in the error message just below it, and the same
+   examples in templates/index.html and in the how-to-use document.
+
+ Change the default port or the scan range
+   app/config.py -> DEFAULT_PORT; run.py -> PORT_SCAN_LIMIT.
+
+ Change the window size
+   run.py -> open_window().
+
+ Change the app icon
+   Replace app/static/images/reunion_logo.png, then rerun
+   tools/make_icon.py (build.ps1 does this for you). Note that sizes
+   48px and under use a cropped version of the logo, because the
+   "Coffee Roasters" line is illegible at taskbar size.
+
+ Add a screen or an endpoint
+   Add a blueprint under app/routes/, register it in
+   app/__init__.py, add the markup to templates/index.html and a
+   matching module under static/js/.
+
+
+------------------------------------------------------------------------------
+ 7. RUNNING IT FROM SOURCE
+------------------------------------------------------------------------------
+
+ Requires Python 3.14 (developed on 3.14.6). From the project root:
+
+   python -m venv .venv
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   python run.py
+
+ That opens the same desktop window, using the project's own data/
+ folder rather than the installed app's data.
+
+ Add --no-window to run the server with no window at all, which is how
+ you poke at the HTTP API with curl or Postman:
+
+   python run.py --no-window
+
+ In that mode it serves until you interrupt it (Ctrl+C / kill).
+
+
+------------------------------------------------------------------------------
+ 8. BUILDING AND RELEASING
+------------------------------------------------------------------------------
+
+ Build-only tools, deliberately NOT in requirements.txt:
+
+   pip install pyinstaller
+   winget install --id JRSoftware.InnoSetup -e
+
+ Then, from the project root:
+
+   powershell -ExecutionPolicy Bypass -File tools\build.ps1
+
+ That regenerates the icon, builds dist\PackagingInventoryLogger\, and
+ compiles installer_output\PackagingInventoryLogger-Setup-<ver>.exe.
+ Pass -SkipInstaller to stop after the executable.
+
+ RELEASE CHECKLIST
+   1. Bump APP_VERSION in app/config.py.
+   2. Run build.ps1.
+   3. Install the new setup exe on a test machine (or uninstall and
+      reinstall on yours) and actually run a small count end to end:
+      upload a workbook, count from a phone, edit an entry, check
+      View Zero Counts, download, open the result in Excel and confirm
+      the counted column is right and diff formulas still work.
+   4. Ship the installer plus these two text files.
+   5. Commit and tag.
+
+ There are NO AUTOMATED TESTS. Step 3 is the test suite. Do not skip
+ it, particularly for anything touching excel_service.py.
+
+ THE SAMPLE WORKBOOK
+   "sample_inventory.xlsx" in this folder is invented data in the
+   production format, so you can test without live company data.
+   It is generated by tools/make_sample_workbook.py - edit that script
+   and rerun it rather than hand-editing the xlsx, so the next person
+   gets the same file.
+
+   It mirrors the real sheet's structure: header row at row 1
+   (Item number / Product name / Physical inventory / counted / diff),
+   the same column widths and number formats, and a defined Excel
+   table over the used range. Two details are deliberately harder than
+   the current production file, because they are what breaks:
+
+     - The diff column holds formulas (=C{row}-D{row}). A round trip
+       must leave them untouched. The production sheet happens to have
+       diff empty right now, so it would not catch a regression here.
+     - PR40105 and RAW0003 do not match VALID_ITEM_NUMBER_PATTERN.
+       That pattern only governs items added by hand in the app;
+       workbook rows are imported as they stand, and the real sheet
+       does contain prefixes like these. Do not "fix" the import by
+       applying the validator to it.
+
+   Verified end to end on 2026-08-20 against version 1.0.0: import
+   maps 22 items to rows 2-23, two entries on one item sum correctly,
+   a zero count exports as 0 while uncounted items stay blank, diff
+   formulas survive, and a manually added item lands at row 24 with
+   the "Added Manually" flag in a new column F.
+
+
+------------------------------------------------------------------------------
+ 9. DEBUGGING
+------------------------------------------------------------------------------
+
+ It will not start
+   Read %LOCALAPPDATA%\PackagingInventoryLogger\data\startup.log.
+   Fatal startup errors write a full traceback there.
+
+ It starts but behaves oddly
+   Run from source with --no-window and watch the console, or open the
+   same URL in a normal desktop browser (Chrome/Edge) so you get real
+   DevTools - the pywebview window has none. The UI is identical.
+
+ A tablet cannot connect
+   Almost always the Windows Firewall rule or the wrong Wi-Fi.
+   Confirm the host is listening:  curl http://127.0.0.1:5000/api/ping
+   Then from another device, hit the LAN address shown in the QR box.
+
+ Suspect the database
+   It is plain SQLite at
+   %LOCALAPPDATA%\PackagingInventoryLogger\data\inventory_counts.sqlite3
+   Open it with DB Browser for SQLite and look directly. Copy the file
+   first if a count is live - it is in WAL mode, so take the -wal and
+   -shm files too, or the copy may be missing recent writes.
+
+ Suspect the spreadsheet handling
+   This is the fragile part. Reproduce with the actual workbook the
+   operator used - the bug is nearly always an unrecognised header
+   name, a header row further down than expected, or merged cells.
+   find_header_row_and_columns() in excel_service.py is where to put
+   a breakpoint.
+
+ HTTP API (useful for testing without the UI):
+   GET   /                            Count screen
+   GET   /api/ping                    Identity check (used at startup)
+   GET   /api/items?q=                Search items
+   GET   /api/item?item_number=       Look up one item
+   GET   /api/items/zero-count        Items with no counts
+   POST  /api/add-manual-item         Add an item not in the workbook
+   POST  /api/save-count              Record a count entry
+   GET   /api/entries?item_number=    List an item's entries
+   POST  /api/update-entry            Change an entry's quantity
+   POST  /api/delete-entry            Remove an entry
+   POST  /validate-upload-password    Check the admin password
+   POST  /upload                      Replace the workbook (admin)
+   POST  /download                    Export updated_inventory.xlsx
+   POST  /shutdown                    Stop the server (localhost only)
+
+
+------------------------------------------------------------------------------
+ 10. KNOWN LIMITATIONS AND FRAGILE SPOTS
+------------------------------------------------------------------------------
+
+ * excel_service.py IS THE MOST FRAGILE CODE IN THE PROJECT.
+   Header matching and export row mapping are verified by hand only.
+   Treat every change there as high risk and test with real workbooks.
+
+ * NO AUTOMATED TESTS AT ALL. If you are going to invest in this app,
+   pytest coverage of excel_service.py (import, header detection,
+   export round trip, manual item append) is the highest-value thing
+   you could add.
+
+ * ONE WORKBOOK AT A TIME. No sessions, no history, no archive.
+   Uploading a new workbook destroys the previous count. If someone
+   wants year-over-year history, that is a schema change: keep a
+   session id on count_entries and stop wiping on import.
+
+ * COUNTING IS UNAUTHENTICATED. Anyone who can reach the host on the
+   network can record or delete counts. Intentional; see section 5.
+
+ * THE ADMIN PASSWORD IS IN THE BINARY. Not a secret.
+
+ * NOT CODE-SIGNED. SmartScreen warns on first run and the publisher
+   shows as unknown. Fixing this needs a paid code-signing
+   certificate; nothing in the code changes.
+
+ * WINDOWS ONLY. The window needs WebView2 (bundled with Windows
+   10/11). The server half is portable Python and would run anywhere,
+   so a browser-only build for another OS would not be a big job.
+
+ * INSTALLED PER WINDOWS USER. Counts do not carry across logins on
+   the same machine.
+
+ * UPLOADS FAIL IF THE WORKBOOK IS OPEN IN EXCEL on the host. The
+   error message says so. Not worth fixing.
+
+ * THE HOST MUST STAY AWAKE. If it sleeps mid-count, tablets drop.
+   Consider setting the host's power plan to never sleep before a
+   count. Nothing is lost when it wakes - the counts are on disk -
+   but people will have to re-scan.
+
+
+------------------------------------------------------------------------------
+ 11. IF YOU HAVE TO TAKE THIS OVER COLD
+------------------------------------------------------------------------------
+
+ A sensible order:
+
+  1. Read "1 - HOW TO USE THIS APP.txt". That is the spec.
+  2. Clone the repo, run it from source, and complete one count on
+     your own machine with a real workbook. An hour here saves a day.
+  3. Read run.py, then app/config.py, then app/excel_service.py, in
+     that order. Those three files hold every decision that matters.
+     The routes and the JavaScript are ordinary CRUD and will make
+     sense once you know the data model.
+  4. Make your change, then do the release checklist in section 8 in
+     full, including a real end-to-end count.
+  5. Back the repository up somewhere the company owns, if that has
+     not already happened.
+
+ The app is small, boring on purpose, and has no infrastructure behind
+ it. Nothing here needs to be rewritten to be maintained.
+
+==============================================================================

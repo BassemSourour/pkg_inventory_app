@@ -1,0 +1,332 @@
+==============================================================================
+ PACKAGING INVENTORY LOGGER - HOW TO USE IT
+ Reunion Coffee Roasters
+ Version 1.0.0
+==============================================================================
+
+This app replaces counting packaging inventory on paper and typing the
+numbers into Excel afterwards.
+
+You install it on ONE computer (the "host computer"). That computer shows
+a QR code. Anyone with a phone or tablet on the same Wi-Fi scans the QR
+code and can start counting immediately - nothing to install on the
+phones or tablets. Everyone's counts go into the same list at the same
+time.
+
+When the count is finished, you download your original Excel file back,
+with the "counted" column filled in for you.
+
+No internet is needed. Everything stays on the local network.
+
+
+------------------------------------------------------------------------------
+ WHAT YOU NEED
+------------------------------------------------------------------------------
+
+  - A Windows 10 or Windows 11 computer to be the host.
+  - That computer and all the phones/tablets on the SAME Wi-Fi network.
+  - Your inventory Excel file (.xlsx). It must have a column for the
+    item number and a column called "counted". (See "About your Excel
+    file" near the bottom. There is also a practice file in this
+    folder, "sample_inventory.xlsx", if you want a trial run first.)
+  - The admin password, which is written at the end of this file.
+
+You do NOT need internet, a server, an IT person, or Excel installed on
+the host computer.
+
+
+------------------------------------------------------------------------------
+ PART 1 - INSTALLING IT (ONCE)
+------------------------------------------------------------------------------
+
+ 1. Copy "PackagingInventoryLogger-Setup-1.0.0.exe" onto the host
+    computer and double-click it.
+
+ 2. Windows may say "Windows protected your PC" in a blue window.
+    This is normal - it appears because the app is not signed with a
+    paid certificate, not because anything is wrong.
+    Click "More info", then click "Run anyway".
+
+ 3. Click through the setup. Tick "Create a desktop shortcut" if you
+    want one. You will NOT be asked for an administrator password,
+    because it installs only for the Windows user who is signed in.
+
+ 4. The first time the app opens, Windows Firewall will ask whether to
+    allow it.
+    *** TICK "Private networks" AND CLICK "Allow access". ***
+    If you skip this, the app will still work on the host computer but
+    phones and tablets will NOT be able to connect.
+
+ If you accidentally clicked Cancel on the firewall prompt, see
+ "Problem: tablets cannot connect" further down.
+
+
+------------------------------------------------------------------------------
+ PART 2 - STARTING A COUNT
+------------------------------------------------------------------------------
+
+ 1. Open "Packaging Inventory Logger" from the Start Menu or the
+    desktop shortcut. It opens in its own window, like any other
+    program.
+
+ 2. The first screen says "Upload Excel File".
+    - Click Choose File / Browse and pick your inventory .xlsx file.
+    - Click "Upload Excel File".
+    - It will ask for the admin password. Type it and click "Continue".
+
+ 3. The app reads every item out of the spreadsheet. When it is done
+    you will see the search screen, and the top of the window shows a
+    box that says "Open on another device" with a web address and a
+    QR code.
+
+ IMPORTANT: Your original Excel file is never changed. The app only
+ reads it. You get a fresh copy at the end.
+
+
+------------------------------------------------------------------------------
+ PART 3 - GETTING PHONES AND TABLETS CONNECTED
+------------------------------------------------------------------------------
+
+ 1. Make sure the phone/tablet is on the same Wi-Fi as the host
+    computer.
+
+ 2. Open the camera on the phone/tablet and point it at the QR code on
+    the host computer's screen. Tap the link that pops up.
+
+ 3. The same counting screen opens in the phone's browser. That is it -
+    no app to install, no password needed to count.
+
+ If a device will not scan, type the web address shown next to the QR
+ code (something like http://192.168.1.42:5000) into the phone's
+ browser by hand.
+
+ You can connect as many devices as you like. Counts from all of them
+ land in the same list.
+
+
+------------------------------------------------------------------------------
+ PART 4 - COUNTING (THIS IS THE PART THE FLOOR STAFF DO)
+------------------------------------------------------------------------------
+
+ TO COUNT AN ITEM:
+
+ 1. Start typing the item number (for example PKG0628) or part of the
+    product name in the search box. Matching items appear as you type.
+ 2. Tap the item you want.
+ 3. The "Selected Item" panel opens. It shows the product name, the
+    inventory figure from the spreadsheet, and anything counted so far.
+ 4. Type the number you counted and tap "Add Count Entry".
+ 5. Done. Search for the next item.
+
+ YOU CAN COUNT THE SAME ITEM AS MANY TIMES AS YOU LIKE.
+ Every entry is saved separately and the app adds them up for you. If
+ you find 3 boxes in one aisle and 5 in another, enter 3, then later
+ enter 5. The total becomes 8. You never have to do the maths in your
+ head, and you never have to hunt for what you entered earlier.
+
+ "STILL HOLDING THE SAME MATERIAL?"
+ Right after you save a count, a shortcut appears with the item you
+ just counted. If you have several of the same box in front of you,
+ tap "Back to Item" instead of searching for it again.
+
+ IF THE ITEM IS NOT IN THE LIST:
+ Some things on the floor are not in the spreadsheet. When a search
+ finds nothing, an "Add Item Not Found" button appears.
+ - Enter the item number, a short description, and the count.
+ - Item numbers must look like one of these:
+       PKG0628      PKG1422-2      FLA9200      FLA9289-2      ALL8109
+   (three letters, four digits, optionally a dash and one more digit)
+ - These items are added to the BOTTOM of the exported spreadsheet and
+   marked in an "Added Manually" column, so the office can see they
+   were not on the original list.
+
+ IF YOU MAKE A MISTAKE:
+ On the "Selected Item" panel, tap "Edit Entries". You will see every
+ count that has been entered for that item, with the time it was
+ entered. You can change a number or delete an entry from there.
+ Deleting a wrong entry is always safe - the total recalculates itself.
+
+ MAKING SURE NOTHING WAS MISSED:
+ Tap "View Zero Counts" at the top of the search screen. That lists
+ every item nobody has entered a count for yet. Work through that list
+ near the end of the count and you will not miss anything.
+ (An item genuinely at zero still needs a "0" entered, otherwise it
+ stays on this list.)
+
+
+------------------------------------------------------------------------------
+ PART 5 - FINISHING: GETTING YOUR EXCEL FILE BACK
+------------------------------------------------------------------------------
+
+ Do this on the HOST COMPUTER.
+
+ 1. Click "Download Current File" at the top right.
+ 2. Type the admin password and click "Continue".
+ 3. A file called "updated_inventory.xlsx" is saved (normally into your
+    Downloads folder).
+
+ That file is your original spreadsheet with the "counted" column
+ filled in, plus any manually added items at the bottom. Any formulas
+ you had in the "diff" column are left alone and will recalculate on
+ their own.
+
+ You can download it as many times as you want, including part way
+ through a count if you want a snapshot.
+
+
+------------------------------------------------------------------------------
+ PART 6 - CLOSING IT, AND STARTING A NEW COUNT LATER
+------------------------------------------------------------------------------
+
+ CLOSING:
+ Click "Exit Application" on the host computer, or just close the
+ window and confirm. Closing it does NOT delete anything - open it
+ again tomorrow and your counts are still there.
+
+ While the app is closed, phones and tablets cannot connect. That is
+ expected. The host computer has to be on and the app has to be open
+ for the count screen to work on other devices.
+
+ STARTING A COMPLETELY NEW COUNT:
+ Upload a new spreadsheet using "Replace Excel File".
+
+ *** WARNING: REPLACING THE SPREADSHEET DELETES EVERY COUNT FROM THE
+     PREVIOUS SESSION. ***
+
+ The app asks you to confirm first. Download your finished
+ updated_inventory.xlsx BEFORE you replace the file - there is no undo
+ and no history of past counts.
+
+
+------------------------------------------------------------------------------
+ ABOUT YOUR EXCEL FILE
+------------------------------------------------------------------------------
+
+ The app finds its columns by reading the HEADER NAMES, not by column
+ letter, so columns are allowed to move around between spreadsheets.
+ It looks in the first 20 rows for the header row.
+
+ It MUST find:
+   - an item number column, headed one of:
+       Item Number / Item # / Item No / Item No. / Number
+   - a counted column, headed one of:
+       Counted / Count / Count Qty / Counted Qty
+
+ It will also use these if they exist:
+   - Product Name / Description / Product
+   - Physical Inventory / Inventory / Physical
+   - Diff / Difference   (read only - never written to)
+
+ Capital letters and spacing do not matter. If a required column is
+ missing, the upload is refused with a message and whatever you had
+ loaded before is left untouched - nothing is lost.
+
+ Only .xlsx files work. An old .xls file must be re-saved as .xlsx
+ first.
+
+ WANT TO PRACTISE FIRST?
+ There is a file called "sample_inventory.xlsx" in this folder. It is
+ made-up data in the right format, safe to experiment with. Upload it,
+ count a few things, download the result, and you will have seen the
+ whole process without touching a real count. When you are ready for
+ the real thing, use "Replace Excel File" to load your actual
+ spreadsheet - which clears the practice counts.
+
+
+------------------------------------------------------------------------------
+ COMMON PROBLEMS
+------------------------------------------------------------------------------
+
+ PROBLEM: Tablets or phones cannot connect / the page will not load.
+   - Is the device on the same Wi-Fi as the host computer? Guest Wi-Fi
+     networks are usually kept separate and will not work.
+   - Is the app still open on the host computer? It has to be.
+   - Did the host computer go to sleep? Wake it up.
+   - Was the firewall prompt dismissed? Fix it like this:
+       Start -> search "Firewall & network protection"
+       -> "Allow an app through firewall" -> find
+       "PackagingInventoryLogger" -> tick Private -> OK.
+     If it is not in the list at all, click "Allow another app",
+     browse to it (see paths below), and add it.
+   - Restarting the app and re-scanning the QR code fixes most things,
+     because the address can change when the computer rejoins Wi-Fi.
+
+ PROBLEM: The QR code address does not match what worked yesterday.
+   That is normal. The network gives the computer a new address from
+   time to time. Always scan the QR code that is on screen right now.
+
+ PROBLEM: "Already running" message when I open the app.
+   It is already open. Look for its window in the taskbar. Only one
+   copy can run at a time on purpose.
+
+ PROBLEM: Uploading a new spreadsheet fails.
+   Close the file in Excel first if you have it open, then try again.
+   Also check the file really is .xlsx and has the required columns.
+
+ PROBLEM: The app will not start at all.
+   There is a log file that says why. Copy this into the address bar
+   of File Explorer:
+       %LOCALAPPDATA%\PackagingInventoryLogger\data
+   Open "startup.log" and read the last few lines. Send them to
+   whoever is looking after the app.
+
+ PROBLEM: My counts vanished.
+   Check you are signed into Windows as the same user. The app installs
+   and stores its data per Windows user - a different login on the same
+   computer gets its own empty copy.
+
+
+------------------------------------------------------------------------------
+ WHERE THINGS ARE ON THE HOST COMPUTER
+------------------------------------------------------------------------------
+
+ The program:
+   %LOCALAPPDATA%\Programs\Packaging Inventory Logger
+
+ Your counts, the loaded spreadsheet, and startup.log:
+   %LOCALAPPDATA%\PackagingInventoryLogger\data
+
+ (Paste those into the File Explorer address bar to open them.)
+
+ Your counts are deliberately kept OUTSIDE the program folder, so
+ updating or uninstalling the app does not throw them away. If you
+ want to back up a count in progress, copy that whole "data" folder
+ somewhere safe.
+
+ TO UNINSTALL: Settings -> Apps -> Installed apps -> Packaging
+ Inventory Logger -> Uninstall. It will ask whether to also delete the
+ saved counts. Answer No if you might reinstall and want them back.
+
+
+------------------------------------------------------------------------------
+ ADMIN PASSWORD
+------------------------------------------------------------------------------
+
+ Password:   Bassemisthebest2026
+
+ It is needed for three things only: uploading a spreadsheet,
+ replacing the spreadsheet, and downloading the finished file.
+
+ COUNTING NEEDS NO PASSWORD. You can hand a tablet to anyone.
+
+ This password exists to stop someone accidentally wiping a count in
+ progress. It is not real security - anyone on the network can record
+ counts. That is deliberate for a shop-floor tool on a trusted
+ network. Do not treat it as a secret worth protecting, and do not
+ rely on it to protect anything sensitive.
+
+
+------------------------------------------------------------------------------
+ THE SHORT VERSION
+------------------------------------------------------------------------------
+
+  1. Open the app on the host computer.
+  2. Upload the spreadsheet (needs the password).
+  3. Everyone scans the QR code.
+  4. Search item -> tap it -> type count -> "Add Count Entry". Repeat.
+  5. "View Zero Counts" to catch anything missed.
+  6. "Download Current File" (needs the password) to get the finished
+     spreadsheet.
+  7. Do NOT replace the spreadsheet until you have downloaded it.
+
+==============================================================================

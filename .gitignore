@@ -27,3 +27,9 @@ desktop.ini
 
 # Installer output
 installer_output/
+
+# Deliverable folder: docs are tracked, the copied installer is not
+deliverable/*.exe
+
+# Deliverable: the generated sample workbook (rebuild with tools/make_sample_workbook.py)
+deliverable/sample_inventory.xlsx
