@@ -24,3 +24,6 @@ desktop.ini
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Installer output
+installer_output/

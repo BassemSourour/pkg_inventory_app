@@ -2,3 +2,4 @@ Flask==3.0.3
 openpyxl==3.1.5
 qrcode[pil]
 waitress
+pywebview==6.2.1

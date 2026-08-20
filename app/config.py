@@ -1,12 +1,38 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
 
-PORT = 5000
+APP_NAME = "Packaging Inventory Logger"
+
+APP_FOLDER_NAME = "PackagingInventoryLogger"
+
+# Read by tools/build.ps1 and passed to the installer compiler,
+# so this is the only place the version needs changing.
+APP_VERSION = "1.0.0"
+
+DEFAULT_PORT = 5000
 
 UPLOAD_PASSWORD = "Bassemisthebest2026"
+
+
+# The port is resolved at startup rather than fixed, because
+# another program may already hold the default. Everything that
+# builds a URL must read it through get_port() so the QR code
+# always points at the port actually in use.
+_runtime_port = DEFAULT_PORT
+
+
+def get_port() -> int:
+    return _runtime_port
+
+
+def set_port(port: int) -> None:
+    global _runtime_port
+
+    _runtime_port = int(port)
 
 
 HEADER_ALIASES = {
@@ -55,11 +81,26 @@ def resource_path(relative_path: str) -> Path:
 
 
 def get_data_directory() -> Path:
+    """
+    Counts and the workbook must live somewhere the operator can
+    always write to. An installed copy sits under Program Files or
+    LocalAppData, so the data folder is kept in the user profile
+    rather than next to the executable. Running from source keeps
+    using the project folder so development data stays visible.
+    """
     if getattr(sys, "frozen", False):
+        local_app_data = os.environ.get(
+            "LOCALAPPDATA"
+        )
+
+        if local_app_data:
+            base_directory = Path(local_app_data)
+        else:
+            base_directory = Path.home()
+
         directory = (
-            Path(sys.executable)
-            .resolve()
-            .parent
+            base_directory
+            / APP_FOLDER_NAME
             / "data"
         )
     else:

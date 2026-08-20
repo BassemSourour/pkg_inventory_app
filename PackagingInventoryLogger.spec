@@ -1,15 +1,35 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('app\\templates', 'app\\templates'), ('app\\static', 'app\\static'), ('data', 'data')]
+# Only the interface is bundled. The workbook and the count
+# database are created in the user profile at runtime, so the
+# development copies in data/ must not be shipped.
+datas = [
+    ('app\\templates', 'app\\templates'),
+    ('app\\static', 'app\\static'),
+]
 binaries = []
 hiddenimports = ['waitress']
-tmp_ret = collect_all('openpyxl')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('qrcode')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('waitress')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+
+for package in (
+    'openpyxl',
+    'qrcode',
+    'waitress',
+    'webview',
+    'clr_loader',
+    'pythonnet',
+):
+    package_datas, package_binaries, package_hiddenimports = collect_all(package)
+    datas += package_datas
+    binaries += package_binaries
+    hiddenimports += package_hiddenimports
+
+# pywebview reaches the WebView2 control through pythonnet, and
+# neither import is visible to static analysis.
+hiddenimports += [
+    'clr',
+    'webview.platforms.winforms',
+]
 
 
 a = Analysis(
@@ -43,6 +63,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='assets\\icon.ico',
 )
 coll = COLLECT(
     exe,
